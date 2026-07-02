@@ -1,0 +1,54 @@
+[Setup Wizard Template]
+TemplateDate=2/3/00 9:49:45 AM
+
+[Select Project and Options]
+txtProjFile=K:\DEVL\PSS III\EDPS\fdis\fdis.vbp
+chkProjRebuild=0
+optBldSetup=False
+chkIncludeDEP=1
+optInternet=False
+optDEPOnly=True
+
+[Distribution Method]
+optFloppyTarg=False
+optSingleDirTarg=False
+optMultDirTarg=False
+
+[Internet Package]
+optRemoteSite=True
+optLocalSite=False
+txtLocalSite=
+
+[Data Access]
+chkUseJet=1
+chkUseODBC=0
+Isam0=
+
+[ActiveX Server Components]
+File1="C:\Pss iii\edps\bin\DBI.dll",True,32763,True,False,,,0,False,False
+File2=
+
+[Confirm Dependencies]
+File1="K:\DEVL\PSS III\EDPS\fdis\qm.dll",True,32762
+File2="C:\WINNT\System32\ds.dll",True,32762
+File3=
+
+[Shared ActiveX Application]
+optDeployApplication=False
+optDeployShared=True
+optRemoteServer1=True
+optRemoteServer0=False
+
+[File Summary]
+File1="C:\WINNT\System32\MSVBVM50.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File2="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\StdOle2.tlb",True,"$(WinSysPathSysFile)",$(TLBRegister),False
+File3="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\OleAut32.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File4="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\OlePro32.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File5="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\AsycFilt.dll",True,"$(WinSysPathSysFile)",,False
+File6="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\Ctl3d32.dll",True,"$(WinSysPathSysFile)",,False
+File7="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\ComCat.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File8="K:\DEVL\PSS III\EDPS\fdis\qm.dll",True,"$(WinSysPath)",,True
+File9="C:\WINNT\System32\ds.dll",True,"$(WinSysPath)",,True
+File10="C:\Pss iii\edps\bin\DBI.dll",True,"$(WinSysPath)",$(DLLSelfRegister),True
+File11="C:\Pss iii\edps\bin\fdis.exe",True,"$(WinSysPath)",$(EXESelfRegister),True
+File12="C:\Pss iii\edps\bin\fdis.DEP",True,"$(WinSysPath)",,True

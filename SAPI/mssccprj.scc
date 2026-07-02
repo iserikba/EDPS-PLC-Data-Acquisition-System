@@ -1,0 +1,5 @@
+SCC = This is a Source Code Control file
+
+[SAPI.mak]
+SCC_Aux_Path = "\\PMEKZALFS0001\NEWAPPS_RW\VSS"
+SCC_Project_Name = "$/DEVL/PSSIII/DLLs/SAPI", RYPAAAAA

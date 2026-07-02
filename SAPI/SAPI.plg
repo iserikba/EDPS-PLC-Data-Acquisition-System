@@ -1,0 +1,37 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: SAPI - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP10C.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SAPI_EXPORTS" /Fp"Release/SAPI.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"K:\DEVL\PSS III\EDPS\SAPI\CConnection.cpp"
+]
+Creating command line "cl.exe @C:\TEMP\RSP10C.tmp" 
+Creating temporary file "C:\TEMP\RSP10D.tmp" with contents
+[
+s7msstd.lib s7msc.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:no /pdb:"Release/SAPILib.pdb" /machine:I386 /def:".\SAPIlib.def" /out:"Release/SAPILib.dll" /implib:"Release/SAPILib.lib" 
+".\Release\CConnection.obj"
+".\Release\CPSession.obj"
+".\Release\SAPIlib.obj"
+]
+Creating command line "link.exe @C:\TEMP\RSP10D.tmp"
+<h3>Output Window</h3>
+Compiling...
+CConnection.cpp
+K:\DEVL\PSS III\EDPS\SAPI\CConnection.cpp(608) : warning C4244: '=' : conversion from 'long' to 'unsigned char', possible loss of data
+K:\DEVL\PSS III\EDPS\SAPI\CConnection.cpp(619) : warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+Linking...
+   Creating library Release/SAPILib.lib and object Release/SAPILib.exp
+
+
+
+<h3>Results</h3>
+SAPILib.dll - 0 error(s), 2 warning(s)
+</pre>
+</body>
+</html>

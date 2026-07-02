@@ -1,0 +1,21 @@
+# Microsoft Developer Studio Generated Dependency File, included by SAPI.mak
+
+.\CConnection.cpp : \
+	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	".\CConnection.h"\
+	".\CPSession.h"\
+	".\SAPI_S7.H"\
+	
+
+.\CPSession.cpp : \
+	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	".\CPSession.h"\
+	".\SAPI_S7.H"\
+	
+
+.\SAPIlib.cpp : \
+	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	".\CConnection.h"\
+	".\CPSession.h"\
+	".\SAPI_S7.H"\
+	

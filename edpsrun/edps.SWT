@@ -1,0 +1,67 @@
+[Setup Wizard Template]
+TemplateDate=2/18/00 12:22:16 PM
+
+[Select Project and Options]
+txtProjFile=K:\DEVL\PSS III\EDPS\edpsrun\edpsrun.vbp
+chkProjRebuild=0
+optBldSetup=True
+chkIncludeDEP=1
+optInternet=False
+optDEPOnly=False
+
+[Distribution Method]
+optFloppyTarg=False
+optSingleDirTarg=True
+optMultDirTarg=False
+
+[Single Directory]
+cboFloppyDrives=0
+cboFloppyDriveSize=0
+txtDirTarget=K:\DEVL\PSS III\EDPS\Install\edps\
+
+[Internet Package]
+optRemoteSite=True
+optLocalSite=False
+txtLocalSite=
+
+[Data Access]
+chkUseJet=1
+chkUseODBC=0
+Isam0=
+
+[ActiveX Server Components]
+File1="C:\Pss iii\edps\bin\DBI.dll",True,32763,True,False,,,0,False,False
+File2="C:\Pss iii\edps\bin\sis.exe",True,32763,True,False,,,0,False,False
+File3="C:\Pss iii\edps\bin\LEIS.dll",True,32763,True,False,,,0,False,False
+File4="C:\Pss iii\edps\bin\fdis.exe",True,32760,True,False,,,0,False,False
+File5=
+
+[Confirm Dependencies]
+File1="C:\WINNT\System32\qm.dll",True,32762
+File2=
+
+[Shared ActiveX Application]
+optDeployApplication=True
+optDeployShared=False
+optRemoteServer1=True
+optRemoteServer0=False
+
+[File Summary]
+File1="C:\WINNT\System32\MSVBVM50.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File2="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\StdOle2.tlb",True,"$(WinSysPathSysFile)",$(TLBRegister),False
+File3="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\OleAut32.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File4="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\OlePro32.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File5="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\AsycFilt.dll",True,"$(WinSysPathSysFile)",,False
+File6="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\Ctl3d32.dll",True,"$(WinSysPathSysFile)",,False
+File7="C:\Program Files\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\ComCat.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File8="C:\WINNT\System32\qm.dll",True,"$(WinSysPath)",,True
+File9="C:\Pss iii\edps\bin\DBI.dll",True,"$(AppPath)",$(DLLSelfRegister),True
+File10="C:\Program Files\Common Files\System\ADO\msado15.dll",True,"$(WinSysPath)",$(DLLSelfRegister),True
+File11="C:\Pss iii\edps\bin\sis.exe",True,"$(AppPath)",$(EXESelfRegister),True
+File12="C:\WINNT\System32\ds.dll",True,"$(WinSysPath)",,True
+File13="C:\Pss iii\edps\bin\fdis.exe",True,"$(AppPath)",$(EXESelfRegister),True
+File14="C:\Pss iii\edps\bin\LEIS.dll",True,"$(AppPath)",$(DLLSelfRegister),True
+File15="K:\DEVL\PSS III\EDPS\edpsrun\edpsrun.exe",True,"$(AppPath)",,False
+File16="K:\DEVL\PSS III\EDPS\edpsrun\edpsrun.DEP",True,"$(AppPath)",,False
+File17="C:\Pss iii\edps\bin\Qr.exe",True,"$(AppPath)",,False
+File18="K:\DEVL\PSS III\EDPS\edpsrun\EDPS.ini",True,"$(AppPath)",,False

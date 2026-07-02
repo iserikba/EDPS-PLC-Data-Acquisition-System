@@ -1,0 +1,7 @@
+; The DEF File
+LIBRARY SAPILib
+
+EXPORTS
+	SAPI_Shut
+	SAPI_read	
+	SAPI_write	
