@@ -1,0 +1,11 @@
+frmSchedTimer = 0, 0, 0, 0, C, 198, 198, 878, 638, C
+cCalculator = 36, 1, 821, 574, 
+modDeclares = 55, 65, 853, 545, 
+cFDPTR = 73, 29, 795, 557, 
+cFormula = 97, 10, 785, 566, 
+cSchedPTR = 110, 110, 790, 506, 
+frmCalcTimer = 0, 0, 0, 0, C, 0, 0, 680, 440, C
+cScheduler = 66, 66, 746, 506, 
+frmScheduler = 0, 0, 0, 0, C, 22, 22, 636, 458, C
+frmTimer = 0, 0, 0, 0, C, 44, 44, 658, 480, C
+modUtlGlobals = 88, 88, 793, 531, 

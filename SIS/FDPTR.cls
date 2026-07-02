@@ -14,6 +14,7 @@ Attribute VB_Exposed = True
 Option Explicit
 
 Public Enum FDAction
+    FDUndefigned = -1
     FDRead = 0
     FDWrite = 1
 End Enum
@@ -33,23 +34,33 @@ Private Type THFDIS
     Date2 As Variant
     Value As Variant
     Tag As Variant
-    Action As Variant
+    Action As FDAction
+    SomeID As Variant
 End Type
 
 Private Datum As THFDIS
 Private Const SDATEFORMAT As String = "MM/dd/YYYY hh:nn:ss"
 Private Const SCLSNAME As String = "cFDPTR"
 Private Const LENTHLEN As Integer = 3
+Private LDB As LEIS.LEISer
+Private bLEISConnAllowed As Boolean
+Private sLogFile As String
 
 ' ds.dll functions
-Private Declare Function SetArrsize Lib "ds.dll" _
-    (ByVal ArrSize As Integer) As Integer
-Private Declare Function SetParamValueAt Lib "ds.dll" _
-    (ByVal StrIdx As Integer, ByVal StrVal As String) As Integer
-Private Declare Function GetParamValueAt Lib "ds.dll" _
-    (ByVal StrIdx As Integer) As String
-Private Declare Function GetUpperArrayBound Lib "ds.dll" _
-    () As Integer
+Private Declare Function SetArrsize Lib "ds.dll" (ByVal ArrSize As Integer) As Integer
+Private Declare Function SetParamValueAt Lib "ds.dll" (ByVal StrIdx As Integer, ByVal StrVal As String) As Integer
+Private Declare Function GetParamValueAt Lib "ds.dll" (ByVal StrIdx As Integer) As String
+Private Declare Function GetUpperArrayBound Lib "ds.dll" () As Integer
+
+' convert.dll functions
+Private Declare Function HStr2Float Lib "convert.dll" (ByVal s4Bites As String) As Single
+Private Declare Function HStr2Long Lib "convert.dll" (ByVal s4Bites As String) As Long
+Private Declare Function HStr2LLng Lib "convert.dll" (ByVal s4Bites As String) As Long
+Private Declare Function HStr2Str Lib "convert.dll" (ByVal sStr As String) As String
+Private Declare Function Float2HStr Lib "convert.dll" (ByVal fVal As Single) As String
+Private Declare Function Long2HStr Lib "convert.dll" (ByVal lVal As Long) As String
+Private Declare Function LLng2HStr Lib "convert.dll" (ByVal lVal As Long) As String
+Private Declare Function Str2HStr Lib "convert.dll" (ByVal sVal As String) As String
 
 Public Property Get Action() As FDAction
     Action = Datum.Action
@@ -58,6 +69,7 @@ End Property
 Public Property Let Action(ByVal vNewValue As FDAction)
     Datum.Action = vNewValue
 End Property
+
 Public Property Get ParamID() As Variant
     ParamID = Datum.ParamID
 End Property
@@ -105,6 +117,7 @@ End Property
 Public Property Let Addr2(ByVal vNewValue As Variant)
     Datum.Addr2 = vNewValue
 End Property
+
 Public Property Get Addr3() As Variant
     Addr3 = Datum.Addr3
 End Property
@@ -128,7 +141,6 @@ End Property
 Public Property Let Addr5(ByVal vNewValue As Variant)
     Datum.Addr5 = vNewValue
 End Property
-
 Public Property Get Addr6() As Variant
     Addr6 = Datum.Addr6
 End Property
@@ -158,21 +170,21 @@ Private Function AlwayString(vParam As Variant) As String
         Case vbString
             AlwayString = vParam
         Case vbInteger
-            AlwayString = Trim(Str(vParam))
+            AlwayString = Trim(str(vParam))
         Case vbLong
-            AlwayString = Trim(Str(vParam))
+            AlwayString = Trim(str(vParam))
         Case vbSingle
-            AlwayString = Trim(Str(vParam))
+            AlwayString = Trim(str(vParam))
         Case vbDouble
-            AlwayString = Trim(Str(vParam))
+            AlwayString = Trim(str(vParam))
         Case vbDecimal
-            AlwayString = Trim(Str(vParam))
+            AlwayString = Trim(str(vParam))
         Case vbDate
             AlwayString = Format(vParam, SDATEFORMAT)
         Case vbBoolean
             AlwayString = IIf(vParam, "True", "False")
         Case vbCurrency
-            AlwayString = "$" + Trim(Str(vParam))
+            AlwayString = "$" + Trim(str(vParam))
         Case Else
             AlwayString = ""
     End Select
@@ -182,15 +194,76 @@ Public Property Get Value() As Variant
     Value = Datum.Value
 End Property
 
-Public Property Let Value(ByVal vNewValue As Variant)
-    Dim sTmp As String
-    Datum.Value = vNewValue
+Private Function GetPartValue(ByRef sPool, ByRef pos) As String
+  Dim iLen As Integer
+  Dim s As String
+    s = Mid(sPool, pos, LENTHLEN)
+    If s = vbNullString Then
+      GetPartValue = "0"
+      Exit Function
+    End If
     
-'    If Me.IsAuto2LEIS Then
-'        LDB.WriteQueue Me.ParamID, _
-'        Me.DateTime, Me.Value, Me.DateTime2
-'    End If
+    iLen = CInt(Mid(sPool, pos, LENTHLEN))
+    pos = pos + LENTHLEN
+    GetPartValue = Mid(sPool, pos, iLen)
+    pos = pos + iLen
+End Function
 
+Public Sub ShareValue(ByVal vNewValue As Variant)
+    Datum.Value = vNewValue
+End Sub
+
+Public Property Let Value(ByVal vNewValue As Variant)
+    Dim sRetStr As String
+    Dim nId As Integer
+    Dim nPos As Integer
+    Dim sValue As String
+    Dim vDate1 As Date
+    Dim vDate2 As Date
+    Dim vMeId As Long
+    
+    Datum.Value = vNewValue
+    If IsAuto2LEIS Then
+      If Me.LinkType = "SGR" Then
+        nPos = 1
+        vMeId = Me.ID
+        vDate1 = Me.Date1
+        vDate2 = Me.Date2
+        Do
+           nId = CInt(GetPartValue(Datum.Value, nPos))
+           If nId = 0 Then Exit Do
+           sValue = GetPartValue(Datum.Value, nPos)
+           LDB.WriteQueue nId, vDate2, sValue, vMeId, vDate1
+        Loop
+      Else
+            sRetStr = LDB.WriteQueue(Me.ParamID, _
+                    Me.Date2, Me.Value, Me.ID, Me.Date1)
+      End If
+'        If sRetStr <> "" Then
+'
+'            sRetStr = LDB.WriteQueue(Me.ParamID, _
+'                    Me.Date2, Me.Value, Me.ID, Me.Date1)
+'
+'        End If
+    End If
+End Property
+
+Public Property Let CValue(ByVal vNewValue As Variant)
+    Datum.Action = FDUndefigned
+    Datum.Addr1 = ""
+    Datum.Addr2 = ""
+    Datum.Addr3 = ""
+    Datum.Addr4 = ""
+    Datum.Addr5 = ""
+    Datum.Addr6 = ""
+    Datum.DataSetName = ""
+    Datum.DataType = "string"
+    Datum.Date1 = ""
+    Datum.Date2 = ""
+    Datum.LinkType = ""
+    Datum.ParamID = ""
+    Datum.Tag = -1
+    Datum.Value = vNewValue
 End Property
 
 Public Property Get Tag() As Variant
@@ -201,16 +274,25 @@ Public Property Let Tag(ByVal vNewValue As Variant)
     Datum.Tag = vNewValue
 End Property
 
-Private Function GetPoolStr(ByRef Str) As String
-    GetPoolStr = Format(Len(Str), String(LENTHLEN, "0"))
-    GetPoolStr = GetPoolStr & Str
+Private Function GetPoolStr(ByRef str) As String
+  Dim nLen As Integer
+    nLen = Len(str)
+    If nLen < 10 Then
+      GetPoolStr = CStr(nLen)
+    Else
+      GetPoolStr = Chr(65 + (nLen \ 100))
+      nLen = nLen Mod 100
+      GetPoolStr = GetPoolStr & Format(nLen, "00")
+    End If
+'    GetPoolStr = Format(Len(str), String(LENTHLEN, "0"))
+    GetPoolStr = GetPoolStr & str
 End Function
 
 Public Property Get PoolString() As String
 '    Dim sTmp As String
     
     PoolString = SCLSNAME + _
-        GetPoolStr(Trim(Str(Datum.Action))) + _
+        GetPoolStr(Trim(str(Datum.Action))) + _
         GetPoolStr(Datum.Addr1) + _
         GetPoolStr(Datum.Addr2) + _
         GetPoolStr(Datum.Addr3) + _
@@ -226,8 +308,66 @@ Public Property Get PoolString() As String
         GetPoolStr(AlwayString(Datum.Tag)) + _
         GetPoolStr(AlwayString(Datum.Value))
 
+End Property
+
+Private Function GetPartPoolStr(ByRef sPool, ByRef pos) As String
+  Dim iLen As Integer
+  Dim s As String
+'    s = Mid(sPool, pos, 1)
+    iLen = Asc(Mid(sPool, pos, 1))
+    If iLen < 65 Then
+      iLen = iLen - 48
+      pos = pos + 1
+    Else
+      iLen = (iLen - 65) * 100 + CInt(Mid(sPool, pos + 1, 2))
+      pos = pos + 3
+    End If
+'    iLen = CInt(Mid(sPool, pos, LENTHLEN))
+'    pos = pos + LENTHLEN
+    GetPartPoolStr = Mid(sPool, pos, iLen)
+    pos = pos + iLen
+End Function
+
+Public Property Let PoolString(ByVal vNewValue As String)
+    Dim iLen As Integer, iComLen As Integer
+
+On Error GoTo ErrorHandler
+
+    If Left(vNewValue, Len(SCLSNAME)) = SCLSNAME Then
+        iComLen = 1 + Len(SCLSNAME)
+        
+        Datum.Action = CLng(GetPartPoolStr(vNewValue, iComLen))
+        Datum.Addr1 = GetPartPoolStr(vNewValue, iComLen)
+        Datum.Addr2 = GetPartPoolStr(vNewValue, iComLen)
+        Datum.Addr3 = GetPartPoolStr(vNewValue, iComLen)
+        Datum.Addr4 = GetPartPoolStr(vNewValue, iComLen)
+        Datum.Addr5 = GetPartPoolStr(vNewValue, iComLen)
+        Datum.Addr6 = GetPartPoolStr(vNewValue, iComLen)
+        Datum.DataSetName = GetPartPoolStr(vNewValue, iComLen)
+        Datum.DataType = GetPartPoolStr(vNewValue, iComLen)
+        Datum.Date1 = Str2Date(GetPartPoolStr(vNewValue, iComLen))
+        Datum.Date2 = Str2Date(GetPartPoolStr(vNewValue, iComLen))
+        Datum.LinkType = GetPartPoolStr(vNewValue, iComLen)
+        Datum.ParamID = CLng(GetPartPoolStr(vNewValue, iComLen))
+        Datum.Tag = CLng(GetPartPoolStr(vNewValue, iComLen))
+        Datum.Value = GetPartPoolStr(vNewValue, iComLen)
     
-'    sTmp = Trim(str(Datum.Action))
+    Else
+        Err.Raise 0, "cFDPTR.PoolString Let", "Wrong prefix of string. Must start with 'cFDPTR'"
+    End If
+    
+    Exit Property
+    
+ErrorHandler:
+    Err.Raise 0, "cFDPTR.PoolString Let", "Error in reading string"
+End Property
+
+'Public Property Get PoolString() As String
+'    Dim sTmp As String
+'
+'    PoolString = SCLSNAME
+'
+'    sTmp = Trim(Str(Datum.Action))
 '    PoolString = PoolString + Format(Len(sTmp), String(LENTHLEN, "0"))
 '    PoolString = PoolString + sTmp
 '
@@ -275,42 +415,14 @@ Public Property Get PoolString() As String
 '    sTmp = AlwayString(Datum.Value)
 '    PoolString = PoolString + Format(Len(sTmp), String(LENTHLEN, "0"))
 '    PoolString = PoolString + sTmp
-    
-End Property
-
-Private Function GetPartPoolStr(ByRef sPool, ByRef pos) As String
-  Dim iLen As Integer
-    iLen = CInt(Mid(sPool, pos, LENTHLEN))
-    pos = pos + LENTHLEN
-    GetPartPoolStr = Mid(sPool, pos, iLen)
-    pos = pos + iLen
-End Function
-
-Public Property Let PoolString(ByVal vNewValue As String)
-    Dim iLen As Integer, iComLen As Integer
-
-On Error GoTo ErrorHandler
-
-    If Left(vNewValue, Len(SCLSNAME)) = SCLSNAME Then
-        iComLen = 1 + Len(SCLSNAME)
-        
-        Datum.Action = CLng(GetPartPoolStr(vNewValue, iComLen))
-        Datum.Addr1 = GetPartPoolStr(vNewValue, iComLen)
-        Datum.Addr2 = GetPartPoolStr(vNewValue, iComLen)
-        Datum.Addr3 = GetPartPoolStr(vNewValue, iComLen)
-        Datum.Addr4 = GetPartPoolStr(vNewValue, iComLen)
-        Datum.Addr5 = GetPartPoolStr(vNewValue, iComLen)
-        Datum.Addr6 = GetPartPoolStr(vNewValue, iComLen)
-        Datum.DataSetName = GetPartPoolStr(vNewValue, iComLen)
-        Datum.DataType = GetPartPoolStr(vNewValue, iComLen)
-        Datum.Date1 = Str2Date(GetPartPoolStr(vNewValue, iComLen))
-        Datum.Date2 = Str2Date(GetPartPoolStr(vNewValue, iComLen))
-        Datum.LinkType = GetPartPoolStr(vNewValue, iComLen)
-        Datum.ParamID = CLng(GetPartPoolStr(vNewValue, iComLen))
-        Datum.Tag = CLng(GetPartPoolStr(vNewValue, iComLen))
-        Datum.Value = GetPartPoolStr(vNewValue, iComLen)
-    
-    
+'End Property
+'
+'Public Property Let PoolString(ByVal vNewValue As String)
+'    Dim iLen As Integer, iComLen As Integer
+'
+'    If Left(vNewValue, Len(SCLSNAME)) = SCLSNAME Then
+'        iComLen = 1 + Len(SCLSNAME)
+'
 '        iLen = CInt(Mid(vNewValue, iComLen, LENTHLEN))
 '        iComLen = iComLen + LENTHLEN
 '        Datum.Action = CLng(Mid(vNewValue, iComLen, iLen))
@@ -385,21 +497,16 @@ On Error GoTo ErrorHandler
 '        iComLen = iComLen + LENTHLEN
 '        Datum.Value = Mid(vNewValue, iComLen, iLen)
 '        iComLen = iLen + iComLen
-    Else
-        Err.Raise 0, "cFDPTR.PoolString Let", "Wrong prefix of string. Must start with 'cFDPTR'"
-    End If
-    
-    Exit Property
-    
-ErrorHandler:
-    Err.Raise 0, "cFDPTR.PoolString Let", "Error in reading string"
-End Property
+'    Else
+'        Err.Raise 0, "cFDPTR.PoolString Let", "Wrong prefix of string. Must start with 'cFDPTR'"
+'    End If
+'End Property
 
-Public Function IsAuto2LEIS() As Boolean
-    IsAuto2LEIS = (Datum.DataSetName <> "")
+Private Function IsAuto2LEIS() As Boolean
+    IsAuto2LEIS = (Len(Datum.DataSetName) > 3)
 End Function
 
-Public Property Let SValue(ByVal vNewValue As Variant)
+Public Property Let sValue(ByVal vNewValue As Variant)
     Datum.Value = vNewValue
 End Property
 
@@ -429,6 +536,12 @@ Public Sub SetAllValues(ByVal ParamID As Variant, _
     Datum.Action = Action
 End Sub
 
+Public Sub PutDataByID(ByVal sID As String, ByVal sRes As String)
+    GetData CInt(sID)
+    Datum.Value = sRes
+    ShareData CInt(sID)
+End Sub
+
 Public Sub GetData(ByVal iIdx As Integer)
     Me.PoolString = GetParamValueAt(iIdx)
 End Sub
@@ -443,6 +556,89 @@ End Property
 
 Public Property Let ArraySize(ByVal vNewValue As Variant)
     SetArrsize CInt(vNewValue)
+End Property
+
+Private Sub Class_Initialize()
+    Set LDB = New LEIS.LEISer
+    bLEISConnAllowed = True
+    If sLogFile = "" Then
+        sLogFile = App.Path & "\EDPS.log"
+    End If
+    Call Str2File(sLogFile, "cFDPTR exampler created.")
+End Sub
+
+Private Sub Class_Terminate()
+    Set LDB = Nothing
+    Call Str2File(sLogFile, "cFDPTR exampler destroyed.")
+End Sub
+
+Public Property Get Hex() As Variant
+    Select Case Datum.DataType
+    Case "float"
+        Hex = Float2HStr(Datum.Value)
+    Case "long"
+        Hex = Long2HStr(Datum.Value)
+    Case "integer"
+        Hex = LLng2HStr(Datum.Value)
+    Case Else
+        If Left(Datum.DataType, 7) = "string*" Then
+            Hex = Str2HStr(Datum.Value)
+        Else
+        End If
+    End Select
+End Property
+
+Public Property Let Hex(ByVal vNewValue As Variant)
+    Select Case Datum.DataType
+    Case "long"
+        Me.Value = HStr2Long(vNewValue)
+    Case "integer"
+        Me.Value = HStr2LLng(vNewValue)
+    Case "float"
+        Me.Value = HStr2Float(vNewValue)
+    Case Else
+        If Left(Datum.DataType, 7) = "string*" Then
+            Me.Value = HStr2Str(vNewValue)
+        Else
+        End If
+    End Select
+End Property
+
+Public Property Get HexLen() As Long
+    Select Case Datum.DataType
+    Case "float"
+        HexLen = 8
+    Case "long"
+        HexLen = 8
+    Case "integer"
+        HexLen = 4
+    Case Else
+        If Left(Datum.DataType, 7) = "string*" Then
+            HexLen = CLng(Right(Datum.DataType, Len(Datum.DataType) - 7)) * 2
+        Else
+        End If
+    End Select
+End Property
+
+Public Property Get ID() As Variant
+    ID = Datum.SomeID
+End Property
+
+Public Property Let ID(ByVal vNewValue As Variant)
+    Datum.SomeID = vNewValue
+End Property
+
+Public Property Get LEISConnAllowed() As Boolean
+    LEISConnAllowed = bLEISConnAllowed
+End Property
+
+Public Property Let LEISConnAllowed(ByVal vNewValue As Boolean)
+    bLEISConnAllowed = vNewValue
+    If bLEISConnAllowed Then
+        LDB.AllowConnection
+    Else
+        LDB.DenyConnection
+    End If
 End Property
 
 Private Function Str2Date(ByVal strDate As String) As Date
@@ -461,4 +657,13 @@ Private Function Str2Date(ByVal strDate As String) As Date
     
     Str2Date = DateAdd("s", iD3, dtLocal)
 End Function
+
+Public Property Let LogPath(ByVal vNewValue As Variant)
+    sLogFile = vNewValue
+End Property
+
+Public Property Get LogPath() As Variant
+    LogPath = sLogFile
+End Property
+
 

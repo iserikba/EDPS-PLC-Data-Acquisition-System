@@ -16,10 +16,9 @@ Option Explicit
 Private FDB As DBI.DBISer
 Private FDPTR As fdis.cFDPTR
 
-Private WithEvents tAFDR As EdpsUtils.CEdpsTimer
+Private WithEvents tAFDR As Timer
 Attribute tAFDR.VB_VarHelpID = -1
-'Private WithEvents tAFDR As Timer
-'Private txtDDEC As TextBox
+Private txtDDEC As TextBox
 Private sReq As String
 Private sLogFile As String
 Private MyQueueNum As Long
@@ -33,14 +32,11 @@ Private Sub Class_Initialize()
     MyQueueNum = 0
     
     Set FDB = New DBI.DBISer
- '   Load frmAFDR
+    Load frmAFDR
     
-'    Set txtDDEC = frmAFDR.txtRWDDEVal
-'    Set tAFDR = frmAFDR.AsRead
-'    tAFDR.Enabled = False
-    Set tAFDR = New EdpsUtils.CEdpsTimer
-    tAFDR.Interval = 1000
-    tAFDR.Enabled = True
+    Set txtDDEC = frmAFDR.txtRWDDEVal
+    Set tAFDR = frmAFDR.AsRead
+    tAFDR.Enabled = False
     Set FDPTR = New cFDPTR
 End Sub
 
@@ -58,8 +54,8 @@ Private Sub Class_Terminate()
     Loop While sReq <> sQUEUEMPTY
     
     Set tAFDR = Nothing
-'    Set txtDDEC = Nothing
-'    Unload frmAFDR
+    Set txtDDEC = Nothing
+    Unload frmAFDR
     
     ' Terminate open connection to SQL
     Set FDB = Nothing
@@ -77,10 +73,6 @@ End Property
 Public Property Let Interval(ByVal vNewValue As Variant)
     tAFDR.Interval = vNewValue
 End Property
-
-Private Sub tAFDR_OnTimer()
-    Call tAFDR_Timer
-End Sub
 
 Private Sub tAFDR_Timer()
     On Error GoTo tAFDR_Timer_error
@@ -152,22 +144,22 @@ Public Function RW_FDatum(ByVal sRequest As String) As String
     FDPTR.PoolString = sRequest
     Select Case FDPTR.LinkType
     Case "DDE"
-'        txtDDEC.LinkTimeout = 100
-'        txtDDEC.LinkTopic = FDPTR.Addr1
-'        txtDDEC.LinkItem = FDPTR.Addr2
-'        If FDPTR.Action = FDAction.FDRead Then
-'            txtDDEC.LinkMode = vbLinkManual
-'            txtDDEC.LinkRequest
-'            txtDDEC.LinkMode = vbLinkNone
-'            FDPTR.Value = txtDDEC.Text
-'            FDPTR.Date2 = Now()
-'        ElseIf FDPTR.Action = FDAction.FDWrite Then
-'            txtDDEC.Text = FDPTR.Value
-'            txtDDEC.LinkMode = vbLinkManual
-'            txtDDEC.LinkPoke
-'            txtDDEC.LinkMode = vbLinkNone
-'            FDPTR.Date2 = Now()
-'        End If
+        txtDDEC.LinkTimeout = 100
+        txtDDEC.LinkTopic = FDPTR.Addr1
+        txtDDEC.LinkItem = FDPTR.Addr2
+        If FDPTR.Action = FDAction.FDRead Then
+            txtDDEC.LinkMode = vbLinkManual
+            txtDDEC.LinkRequest
+            txtDDEC.LinkMode = vbLinkNone
+            FDPTR.Value = txtDDEC.Text
+            FDPTR.Date2 = Now()
+        ElseIf FDPTR.Action = FDAction.FDWrite Then
+            txtDDEC.Text = FDPTR.Value
+            txtDDEC.LinkMode = vbLinkManual
+            txtDDEC.LinkPoke
+            txtDDEC.LinkMode = vbLinkNone
+            FDPTR.Date2 = Now()
+        End If
     Case "SGR"
         If FDPTR.Action = FDAction.FDRead Then
             lRetCode = SAPI_MRead(FDPTR.Addr1, sStr)

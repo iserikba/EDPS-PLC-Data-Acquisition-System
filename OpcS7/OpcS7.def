@@ -1,0 +1,8 @@
+LIBRARY	OpcS7
+
+EXPORTS
+	SAPI_Shut
+	SAPI_Read
+	SAPI_Write
+	SAPI_MRead
+	SAPI_MWrite

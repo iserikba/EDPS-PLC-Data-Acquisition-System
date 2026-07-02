@@ -1,0 +1,26 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EdpsUtils", "EdpsUtils.vcproj", "{29286F9A-18C8-420C-B9EA-6FAA68C15C00}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EdpsUtilsPS", "EdpsUtilsPS.vcproj", "{64F30813-97BE-4460-B3AE-CD4A7D1AA157}"
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+		{64F30813-97BE-4460-B3AE-CD4A7D1AA157}.0 = {29286F9A-18C8-420C-B9EA-6FAA68C15C00}
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{29286F9A-18C8-420C-B9EA-6FAA68C15C00}.Debug.ActiveCfg = Debug|Win32
+		{29286F9A-18C8-420C-B9EA-6FAA68C15C00}.Debug.Build.0 = Debug|Win32
+		{29286F9A-18C8-420C-B9EA-6FAA68C15C00}.Release.ActiveCfg = Release|Win32
+		{29286F9A-18C8-420C-B9EA-6FAA68C15C00}.Release.Build.0 = Release|Win32
+		{64F30813-97BE-4460-B3AE-CD4A7D1AA157}.Debug.ActiveCfg = Debug|Win32
+		{64F30813-97BE-4460-B3AE-CD4A7D1AA157}.Release.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
