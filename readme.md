@@ -22,12 +22,13 @@ The application is highly modular, splitting distinct responsibilities into sepa
 
 * **EDPSRun (Application Starter):** The bootstrapper that sequentially initializes and runs all system modules based on configuration parameters defined in `EDPS.INI`.
 * **FDIS (Foreign Data Interface System):** The edge-communication layer. It obtains parameters from foreign sources (PLCs) upon request or on a cyclic timer. It handles DDE, OPC, and API protocols and manages input/output job queues.
-* **SIS (Supervision Interface System):** The "brain" of the application. It acts as the active coordinator, determining necessary events, managing data flows, and creating asynchronous queues for historical data buffering. It features a cyclic reader driven by a Loop Parameters Table.
-* **DBIS (DataBase Interface System):** Manages the reliable, synchronous ADO connection to the primary MS SQL Server for dataset manipulation and control info updates.
+* **SIS (Supervision Interface System):** The "brain" of the application. It acts as the active coordinator. It reads instruction codes and PLC addresses from a local database. It then determines necessary events, manages data flows, and creates asynchronous queues for historical data buffering. It features a cyclic reader driven by a Loop Parameters Table for scanning event flags from PLCs.
+* **SAPI (System API):** This system provides a middle tier of data exchange between the PLCs and EDPS. SAPI evolved from DDE at the beginning of the project to OPC and S7 API as soon as new communication technologies became available.
+* **DBIS (DataBase Interface System):** Manages the synchronous ADO connection to the primary MS SQL Server for dataset manipulation and control info updates.
 * **QR (Query Reader):** A bridge module that prepares SQL queries to be performed asynchronously, passing them down the pipeline.
 * **LEIS (Local Engine Interface System):** The local buffering engine. It receives prepared queries and stores them in a local SQL Server database, guaranteeing zero data loss during enterprise network outages.
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```text
 📦 EDPS
@@ -43,7 +44,7 @@ The application is highly modular, splitting distinct responsibilities into sepa
 
 ## Data Flow & Workflow
 
-1. **Data Ingestion:** `FDIS` polls the PLC using the configured protocol (e.g., OPC) based on the timer loops defined in `SIS`.
+1. **Data Ingestion:** `FDIS` polls the PLC using the configured protocol, via one of a SAPI module, based on the timer loops defined in `SIS`.
 2. **Supervision & Routing:** `SIS` evaluates the raw data. If it detects a critical event (batch stop, QA sample), it coordinates the data flow.
 3. **Local Buffering:** Historical data is passed via OLE to the `LEIS`, which safely queues it into a Local SQL Server DB via ADO.
 4. **Enterprise Sync:** `QR` and `DBIS` work in tandem to asynchronously push the buffered data from the local engine up to the primary MS SQL Server over the Office LAN.
