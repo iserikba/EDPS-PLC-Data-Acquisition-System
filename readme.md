@@ -35,6 +35,8 @@ The application is highly modular, splitting distinct responsibilities into sepa
  ┣ 📂 edpsrun      # Source/Binaries for the Application Starter module
  ┣ 📂 FDIS         # Source/Binaries for the Foreign Data Interface System
  ┣ 📂 LEIS         # Source/Binaries for the Local Engine Interface System
+ ┣ 📂 OpcS7		   # Source/Binaries for the Client of the OPC Step7 API 
+ ┣ 📂 SIS          # Source/Binaries for the PLC Coomunication Interface	
  ┗ 📂 SAPI         # Source/Binaries for the specific API communication layers
 
 ```
