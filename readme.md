@@ -8,22 +8,21 @@ The system is built with a decoupled architecture, ensuring fault-tolerant data 
 
 ## Key Features
 
-* **Hardware-Independent Polling:** Interfaces with heterogeneous industrial sources using a unified hardware-independent interface.
-* **Multi-Protocol Support:** Communicates with PLCs via standard industrial protocols including **OPC**, **DDE**, and **SAPI/API**.
-* **Asynchronous Data Queueing:** Uses dedicated queues for read/write jobs, ensuring the polling engine is never blocked by database latency.
-* **Fault-Tolerant Architecture:** Implements a Local Engine Interface System (LEIS) connected to a local SQL Server to buffer historical data in the event of a network failure with the primary enterprise SQL Server.
-* **HMI Integration:** Seamlessly integrates with HMI applications (like Wonderware InTouch) to provide real-time control info and supervision.
+* **Hardware-Independent Polling:** Interfaces with heterogeneous industrial sources using a unified, hardware-independent interface.
+* **Multi-Protocol Communication:** Communicates with PLCs via standard industrial protocols, evolving from **InTouch DDE** at the project's inception to **SAPI-S7** and **OPC UA** as communication technologies advanced.
+* **Asynchronous Data Queueing:** Uses dedicated queues for read/write jobs and historical data buffering, ensuring the primary polling engine is never blocked by database latency.
+* **Fault-Tolerant Architecture:** Implements a Local Engine Interface System (LEIS) connected to a local SQL Server to buffer historical data, guaranteeing zero data loss in the event of an enterprise network outage.
+* **Flexible HMI Integration & Testing:** Integrates seamlessly with HMI applications (like Wonderware InTouch) for real-time control and supervision. Additionally, its VBA-compatible communication libraries allow MS Excel to be used as a lightweight HMI complement for testing and research without requiring expensive HMI application development.
 
-##  System Architecture
+## System Architecture
 
 The application is highly modular, splitting distinct responsibilities into separate executables and DLLs that communicate via OLE and ADO.
 
 ### Core Modules:
 
 * **EDPSRun (Application Starter):** The bootstrapper that sequentially initializes and runs all system modules based on configuration parameters defined in `EDPS.INI`.
-* **FDIS (Foreign Data Interface System):** The edge-communication layer. It obtains parameters from foreign sources (PLCs) upon request or on a cyclic timer. It handles DDE, OPC, and API protocols and manages input/output job queues.
 * **SIS (Supervision Interface System):** The "brain" of the application. It acts as the active coordinator. It reads instruction codes and PLC addresses from a local database. It then determines necessary events, manages data flows, and creates asynchronous queues for historical data buffering. It features a cyclic reader driven by a Loop Parameters Table for scanning event flags from PLCs.
-* **SAPI (System API):** This system provides a middle tier of data exchange between the PLCs and EDPS. SAPI evolved from DDE at the beginning of the project to OPC and S7 API as soon as new communication technologies became available.
+* **FDIS/SAPI/OpcS7 (Foreign Data Interface System/Simple Application Programming Interface/Open Platform Communications):** This system is a communication layer of the Supervision Interface System. It provides a middle tier of data exchange between the PLCs and EDPS, evolving from DDE at the beginning of the project to SAPI-S7 and OPC UA as new communication technologies became available. FDIS handles communication via an InTouch DDE server. SAPI acts as a client communicating over the S7 Simple Application Programming Interface, and OpcS7 is based on the hardware-independent Open Platform Communications Unified Architecture. An additional benefit of this library is that it is compatible with VBA; combined with MS Excel, it provides HMI-complementary functionality for testing and research without requiring expensive HMI application development.
 * **DBIS (DataBase Interface System):** Manages the synchronous ADO connection to the primary MS SQL Server for dataset manipulation and control info updates.
 * **QR (Query Reader):** A bridge module that prepares SQL queries to be performed asynchronously, passing them down the pipeline.
 * **LEIS (Local Engine Interface System):** The local buffering engine. It receives prepared queries and stores them in a local SQL Server database, guaranteeing zero data loss during enterprise network outages.
@@ -36,12 +35,11 @@ The application is highly modular, splitting distinct responsibilities into sepa
  ┣ 📂 edpsrun      # Source/Binaries for the Application Starter module
  ┣ 📂 FDIS         # Source/Binaries for the Foreign Data Interface System
  ┣ 📂 LEIS         # Source/Binaries for the Local Engine Interface System
- ┣ 📂 OpcS7		   # Source/Binaries for the Client of the OPC Step7 API 
- ┣ 📂 SIS          # Source/Binaries for the PLC Coomunication Interface	
- ┗ 📂 SAPI         # Source/Binaries for the specific API communication layers
+ ┣ 📂 OpcS7        # Source/Binaries for the Open Platform Communications for S7 Client 
+ ┣ 📂 SIS          # Source/Binaries for the Siemens Interface System
+ ┗ 📂 SAPI         # Source/Binaries for the Siemens S7 Simple Application Programming Interface Client
 
 ```
-
 ## Data Flow & Workflow
 
 1. **Data Ingestion:** `FDIS` polls the PLC using the configured protocol, via one of a SAPI module, based on the timer loops defined in `SIS`.
